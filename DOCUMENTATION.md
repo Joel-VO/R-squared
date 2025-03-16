@@ -30,12 +30,36 @@ The retrieved text(court document) is sent to the large language model as contex
 ## PDF to Image conversion
 - **Logic** : Straightforward text extraction from the pdfs not possible due to its inherent image nature. Therefore conversions to image files is necessary.
 - **Used PyMuPdf** - a Python binding for the MuPdf library to facilitate lightweight, high performance conversion of Pdf files to other supported formats, here for pdf to image conversions.
+```bash
+import pymupdf
+```
 - *Directories created for each pdf file -> Converted to image file(per pdf page) -> stored under respected file directories(.png).*
+
+```bash
+self.doc = pymupdf.open(pdf_file)       #from src/components/pdf_ocr_extractor.py
+for page_num in range(len(self.doc)):
+    page = self.doc[page_num]
+    pix = page.get_pixmap()
+    img_path = f"output_images/{img_counter}/page_{page_num + 1}.png"
+    pix.save(img_path)
+```
 
 ## Text extraction from Image files
 - **Logic** : The contents present in the images are to be extracted in a textual format to make the information accessable, retrievable and storable.
 - **Used PyTesseract** - a Python wrapper for the open-source OCR(Optical Character Recognition) library developed by Google, Tesseract.
+```bash
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+```
+
 - *Directories created for each converted image -> PyTesseract for converting images to strings of text -> Extracted text stored under respective directories(.txt).*
+
+```bash
+for image_file in glob.glob(image_folder + "/*.png"):     #from src/components/pdf_ocr_extractor.py
+    text = text + " " + pytesseract.image_to_string(image_file)
+with open(f"output_text/{text_counter}/text_{text_counter}.txt","w") as f:
+    f.write(text)
+```
 
 ## Vector Embeddings
 - **Logic** : The extracted textual data are to be converted to vectore embeddings in N-dimensional space for capturing semantic meaning and relationships. Computational efficiency to be improved and for efficient data storage.
@@ -60,4 +84,5 @@ The retrieved text(court document) is sent to the large language model as contex
 - *Built streamlit app to combine the modules for Faiss database, user query processing and response generation from the llm to implement a complete responsive system.*
 - *Added additional functionality for accpeting user inputs to retrieve data from the vector database(Querying), so as to retrive and display the appropriate court document within the web application.*     **ChatBot|Database querying**
 
-
+# Scalability
+- **streamlit**
